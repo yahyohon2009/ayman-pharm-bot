@@ -22,7 +22,6 @@ const regions = {
   'Qoraqalpog‘iston': ['Nukus', 'Xo‘jayli', 'Taxiatosh']
 };
 
-
 const medicines = {
   sinepar: {
     name: "Sinepar",
