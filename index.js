@@ -4,73 +4,38 @@ const TelegramBot = require('node-telegram-bot-api');
 const token = '8166009723:AAHE5TFG0IJPXG-jwPVABQpU1RzRBkAvVwU';
 const ADMIN_ID = 7791362060;
 const bot = new TelegramBot(token, { polling: true });
-console.log("✅ Bot ishga tushdi...");
 
-const regions = {
-  'Toshkent': ['Chilonzor', 'Yunusobod', 'Olmazor', 'Yakkasaroy', 'Mirzo Ulug‘bek', 'Bektemir'],
-  'Namangan': ['Namangan shahri', 'Davlatobod', 'Chortoq', 'Pop', 'To‘raqo‘rg‘on', 'Yangiqo‘rg‘on'],
-  'Andijon': ['Andijon shahri', 'Asaka', 'Xonobod', 'Shaxrixon', 'Paxtaobod', 'Qo‘rg‘ontepa'],
-  'Farg‘ona': ['Farg‘ona shahri', 'Qo‘qon', 'Marg‘ilon', 'Rishton', 'Oltiariq', 'Quva'],
-  'Samarqand': ['Samarqand shahri', 'Kattaqo‘rg‘on', 'Urgut', 'Ishtixon', 'Paxtachi'],
-  'Buxoro': ['Buxoro shahri', 'Kogon', 'G‘ijduvon', 'Vobkent'],
-  'Xorazm': ['Urganch', 'Xiva', 'Xonqa', 'Yangibozor'],
-  'Qashqadaryo': ['Qarshi', 'Shahrisabz', 'Kitob', 'Koson'],
-  'Surxondaryo': ['Termiz', 'Denov', 'Sherobod'],
-  'Jizzax': ['Jizzax shahri', 'Zomin', 'G‘allaorol'],
-  'Navoiy': ['Navoiy shahri', 'Zarafshon', 'Karmana'],
-  'Sirdaryo': ['Guliston', 'Shirin', 'Boyovut'],
-  'Qoraqalpog‘iston': ['Nukus', 'Xo‘jayli', 'Taxiatosh']
-};
+console.log("✅ Bot ishga tushdi...");
 
 const medicines = {
   sinepar: {
     name: "Sinepar",
     price: "15 000 so'm",
     description: {
-      'UZ': "Og'riq qoldiruvchi dori",
-      'RU': "Обезболивающее средство",
-      'EN': "Pain reliever medicine"
+      UZ: "Og'riq qoldiruvchi dori",
+      RU: "Обезболивающее средство",
+      EN: "Pain reliever medicine"
     },
     address: "Namangan, Davlatobod tumani, O‘rta Rovuston, Rovuston savdo markazi yonida",
-    phone: "+998 88 686 47 47"
+    phone: "+998 88 686 47 47",
+    map: "https://maps.google.com/?q=41.008730,71.641760"
   },
   analgin: {
     name: "Analgin",
     price: "6 000 so'm",
     description: {
-      'UZ': "Oddiy og'riq qoldiruvchi",
-      'RU': "Обычное обезболивающее",
-      'EN': "Regular pain reliever"
+      UZ: "Oddiy og'riq qoldiruvchi",
+      RU: "Обычное обезболивающее",
+      EN: "Regular pain reliever"
     },
     address: "Toshkent, Chilonzor tumanidagi dorixona",
-    phone: "+998 99 123 45 67"
-  },
-  nurofen: {
-    name: "Nurofen",
-    price: "18 000 so'm",
-    description: {
-      'UZ': "Harorat tushiruvchi va og'riq qoldiruvchi",
-      'RU': "Жаропонижающее и обезболивающее",
-      'EN': "Fever reducer and painkiller"
-    },
-    address: "Andijon, Shaxrixon dorixonasi",
-    phone: "+998 90 111 22 33"
-  },
-  paracetamol: {
-    name: "Paracetamol",
-    price: "5 000 so'm",
-    description: {
-      'UZ': "Issiqlikni tushiruvchi, og'riqni kamaytiruvchi",
-      'RU': "Снижает жар и боль",
-      'EN': "Reduces fever and pain"
-    },
-    address: "Farg‘ona, Marg‘ilon dorixonasi",
-    phone: "+998 91 987 65 43"
+    phone: "+998 99 123 45 67",
+    map: "https://maps.google.com/?q=41.2950,69.2285"
   }
 };
 
-
 const userStates = {};
+
 const messages = {
   UZ: {
     welcome: "🇺🇿 Marhamat, tilni tanlang 👇",
@@ -88,7 +53,8 @@ const messages = {
     change_lang: "🗣 Tilni o‘zgartirish",
     change_location: "📍 Hududni o‘zgartirish",
     search_btn: "🔍 Qidiruv",
-    feedback_btn: "💬 Fikr bildirish"
+    feedback_btn: "💬 Fikr bildirish",
+    more_needed: "➕ Yana dori kerak"
   },
   RU: {
     welcome: "🇷🇺 Пожалуйста, выберите язык 👇",
@@ -106,7 +72,8 @@ const messages = {
     change_lang: "🗣 Сменить язык",
     change_location: "📍 Сменить регион",
     search_btn: "🔍 Поиск",
-    feedback_btn: "💬 Обратная связь"
+    feedback_btn: "💬 Обратная связь",
+    more_needed: "➕ Нужны еще лекарства"
   },
   EN: {
     welcome: "🇬🇧 Please choose a language 👇",
@@ -124,7 +91,8 @@ const messages = {
     change_lang: "🗣 Change language",
     change_location: "📍 Change region",
     search_btn: "🔍 Search",
-    feedback_btn: "💬 Feedback"
+    feedback_btn: "💬 Feedback",
+    more_needed: "➕ Need more medicine"
   }
 };
 
@@ -132,15 +100,13 @@ bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   userStates[chatId] = {};
   const langs = ['🇺🇿 UZ', '🇷🇺 RU', '🇬🇧 EN'];
-  bot.sendMessage(chatId,
-    `${messages.UZ.welcome}\n\n${messages.RU.welcome}\n\n${messages.EN.welcome}`,
-    {
-      reply_markup: {
-        keyboard: [langs],
-        resize_keyboard: true,
-        one_time_keyboard: true
-      }
-    });
+  bot.sendMessage(chatId, `${messages.UZ.welcome}\n\n${messages.RU.welcome}\n\n${messages.EN.welcome}`, {
+    reply_markup: {
+      keyboard: [langs],
+      resize_keyboard: true,
+      one_time_keyboard: true
+    }
+  });
 });
 
 bot.on('message', (msg) => {
@@ -149,7 +115,6 @@ bot.on('message', (msg) => {
   if (!userStates[chatId]) userStates[chatId] = {};
   const state = userStates[chatId];
 
-  // til tanlovi
   if (['🇺🇿 UZ', '🇷🇺 RU', '🇬🇧 EN'].includes(text)) {
     state.lang = text.includes('UZ') ? 'UZ' : text.includes('RU') ? 'RU' : 'EN';
     bot.sendMessage(chatId, messages[state.lang].send_phone, {
@@ -166,7 +131,7 @@ bot.on('message', (msg) => {
     state.phone = msg.contact.phone_number;
     bot.sendMessage(chatId, messages[state.lang].region, {
       reply_markup: {
-        keyboard: Object.keys(regions).map(r => [r]),
+        keyboard: [['Namangan'], ['Toshkent']],
         resize_keyboard: true,
         one_time_keyboard: true
       }
@@ -174,11 +139,11 @@ bot.on('message', (msg) => {
     return;
   }
 
-  if (regions[text]) {
+  if (['Namangan', 'Toshkent'].includes(text)) {
     state.region = text;
     bot.sendMessage(chatId, messages[state.lang].district, {
       reply_markup: {
-        keyboard: regions[text].map(d => [d]),
+        keyboard: [['Davlatobod'], ['Chilonzor']],
         resize_keyboard: true,
         one_time_keyboard: true
       }
@@ -186,7 +151,7 @@ bot.on('message', (msg) => {
     return;
   }
 
-  if (state.region && regions[state.region].includes(text)) {
+  if (['Davlatobod', 'Chilonzor'].includes(text)) {
     state.district = text;
     const m = messages[state.lang];
     bot.sendMessage(chatId, m.pharmacy_welcome, {
@@ -218,7 +183,7 @@ bot.on('message', (msg) => {
   if (text === m.change_location) {
     bot.sendMessage(chatId, m.region, {
       reply_markup: {
-        keyboard: Object.keys(regions).map(r => [r]),
+        keyboard: [['Namangan'], ['Toshkent']],
         resize_keyboard: true,
         one_time_keyboard: true
       }
@@ -239,12 +204,13 @@ bot.on('message', (msg) => {
   const keyword = text?.toLowerCase();
   if (keyword && keyword.length >= 3 && medicines[keyword]) {
     const med = medicines[keyword];
-    bot.sendMessage(chatId, `💊 ${med.name}\n💵 ${med.price}\n🏪 Ayman Pharm\n📍 ${med.address}\n📞 ${med.phone}\n\n${m.suggestion}`, {
+    bot.sendMessage(chatId, `💊 ${med.name}\n💵 ${med.price}\n📍 ${med.address}\n📞 ${med.phone}\n🗺 [Google xarita havola](${med.map})\n\n${m.suggestion}`, {
+      parse_mode: 'Markdown',
       reply_markup: {
-        inline_keyboard: [[
-          { text: '✅ Ha', callback_data: 'confirm_order' },
-          { text: '❌ Yo‘q', callback_data: 'cancel_order' }
-        ]]
+        inline_keyboard: [
+          [{ text: '✅ Ha', callback_data: `confirm_${keyword}` }, { text: '❌ Yo‘q', callback_data: 'cancel' }],
+          [{ text: m.more_needed, callback_data: 'more_needed' }]
+        ]
       }
     });
   } else if (keyword && keyword.length >= 3) {
@@ -255,20 +221,22 @@ bot.on('message', (msg) => {
 bot.on('callback_query', (query) => {
   const chatId = query.message.chat.id;
   const state = userStates[chatId] || {};
-  const m = messages[state.lang || 'UZ'];
+  const lang = state.lang || 'UZ';
+  const m = messages[lang];
 
-  if (query.data === 'confirm_order') {
-    const order = `📦 Yangi buyurtma:\n👤 ID: ${chatId}\n📞 Tel: ${state.phone}\n📍 Hudud: ${state.region}, ${state.district}\n💊 Dori: Sinepar\n💵 Narx: 15 000 so'm\n\n`;
+  if (query.data.startsWith('confirm_')) {
+    const medKey = query.data.split('_')[1];
+    const med = medicines[medKey];
+    const order = `📦 Yangi buyurtma:\n👤 ID: ${chatId}\n📞 Tel: ${state.phone}\n📍 Hudud: ${state.region}, ${state.district}\n💊 Dori: ${med.name}\n💵 Narx: ${med.price}\n\n`;
 
-    // Adminga yuborish
     bot.sendMessage(ADMIN_ID, order);
     bot.sendMessage(chatId, m.confirmed);
-
-    // Faylga yozish
     fs.appendFile('orders.txt', order, (err) => {
       if (err) console.error('❌ Faylga yozishda xatolik:', err);
     });
-  } else {
+  } else if (query.data === 'cancel') {
     bot.sendMessage(chatId, m.cancelled);
+  } else if (query.data === 'more_needed') {
+    bot.sendMessage(chatId, m.search);
   }
 });
